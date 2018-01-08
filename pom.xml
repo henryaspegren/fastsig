@@ -86,5 +86,12 @@
 	    <artifactId>commons-codec</artifactId>
 	    <version>1.11</version>
 	</dependency>	
+	<dependency>
+	<groupId>bb.util</groupId>
+		<artifactId>bb-util</artifactId>
+		<version>1.0</version>
+		<scope>system</scope>
+		<systemPath>${basedir}/lib/bb.jar</systemPath>
+</dependency>
   </dependencies>
 </project>
