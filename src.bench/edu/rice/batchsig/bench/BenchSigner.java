@@ -19,32 +19,25 @@
 
 package edu.rice.batchsig.bench;
 
-import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.Security;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Random;
 
 import org.apache.commons.cli.BasicParser;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.Option;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.OptionGroup;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-
-
 
 import com.google.common.base.Function;
 import com.google.common.base.Supplier;
@@ -55,8 +48,6 @@ import edu.rice.batchsig.IMessage;
 import edu.rice.batchsig.MerkleQueue;
 import edu.rice.batchsig.Message;
 import edu.rice.batchsig.OMessage;
-import edu.rice.batchsig.ProcessQueue;
-import edu.rice.batchsig.QueueBase;
 import edu.rice.batchsig.ShutdownableThread;
 import edu.rice.batchsig.SignaturePrimitives;
 import edu.rice.batchsig.SimpleQueue;

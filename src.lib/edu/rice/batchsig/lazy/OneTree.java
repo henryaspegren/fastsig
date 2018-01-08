@@ -25,10 +25,11 @@ public class OneTree {
 	/** Map from an integer version number to the message at that version number. */
 	HashMap<Integer, IMessage> bundles = new LinkedHashMap<Integer, IMessage>(1,.75f, false);
 	
-	/** Cache of root hashes for each unvalidated bundle.
+	/** 
+	 *    Cache of root hashes for each unvalidated bundle.
 	 *    When we verify a splice, we need to take the predecessor's bundle agg() and compare it to aggV(pred.version).
 	 *    Rather than rebuild the pred's pruned tree, or cache the whole thing, just cache the parts we need, the agg().
-	 *  */
+	 */
 	HashMap<Integer, ByteString> roothashes = new HashMap<Integer, ByteString>();
 
 	/**
@@ -36,7 +37,7 @@ public class OneTree {
 	 * given bundle.
 	 * 
 	 * When we find the 'root' node of a dependency tree, that will be an
-	 * exlempar, but that root isn't really a message. It is the history tree version of a different message.
+	 * exemplar, but that root isn't really a message. It is the history tree version of a different message.
 	 * This map tells us which message has that root, so that we can use its public signature to verify the tree.
 	 * 
 	 */

@@ -22,7 +22,6 @@ package edu.rice.batchsig.lazy;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.google.common.collect.HashMultimap;

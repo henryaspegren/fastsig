@@ -21,7 +21,6 @@ package edu.rice.batchsig.lazy;
 
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.google.common.collect.HashBasedTable;
@@ -31,7 +30,6 @@ import com.google.common.collect.Table;
 
 import edu.rice.batchsig.IMessage;
 import edu.rice.batchsig.SignaturePrimitives;
-import edu.rice.batchsig.HistTreeTools;
 import edu.rice.batchsig.bench.Tracker;
 
 /**

@@ -7,7 +7,6 @@ import org.junit.Test;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 
-import edu.rice.historytree.*;
 import edu.rice.historytree.aggs.*;
 import edu.rice.historytree.generated.Serialization;
 import edu.rice.historytree.storage.AppendOnlyArrayStore;

@@ -3,7 +3,6 @@ package edu.rice.batchsig;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
-import java.util.Arrays;
 
 import org.junit.Test;
 
@@ -43,8 +42,6 @@ public class TestPublicKeyPrims extends TestCase {
 		sigblob.setSignatureType(SignatureType.SINGLE_MESSAGE);
 		return sigblob.build();
 	}
-	
-
 
 	@Test
 	public void testSignaturesVerify() {

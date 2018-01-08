@@ -6,7 +6,9 @@ package edu.rice.batchsig;
 
 import edu.rice.historytree.generated.Serialization.TreeSigBlob;
 
-/** Simple message creator that can store signatures and all the rest. */
+/** Simple message creator that can store signatures and all the rest.
+ * 	Should be used for testing purposes only.
+ * */
 class MessageWrap implements IMessage, OMessage {
 	final byte data[];
 	TreeSigBlob signature;
@@ -58,6 +60,7 @@ class MessageWrap implements IMessage, OMessage {
 
 	@Override
 	public void signatureValidity(boolean valid) {
+		// This is wrapper should only be used for testing purposes
 		TestSimpleQueue.assertEquals(targetvalidity.booleanValue(),valid);
 		targetvalidity = null;
 	}

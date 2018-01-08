@@ -19,7 +19,6 @@
 
 package edu.rice.batchsig.bench;
 
-import java.io.DataOutputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -36,8 +35,6 @@ import java.security.PublicKey;
 import java.security.Signature;
 import java.security.SignatureException;
 import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Queue;
@@ -46,7 +43,6 @@ import java.util.Queue;
 import com.google.protobuf.ByteString;
 
 import edu.rice.batchsig.SignaturePrimitives;
-import edu.rice.historytree.generated.Serialization.SignatureType;
 import edu.rice.historytree.generated.Serialization.TreeSigBlob;
 import edu.rice.historytree.generated.Serialization.TreeSigBlob.SignatureAlgorithm;
 

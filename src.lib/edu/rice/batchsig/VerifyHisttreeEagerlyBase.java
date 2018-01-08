@@ -1,15 +1,9 @@
 package edu.rice.batchsig;
 
 import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
 
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
-
-
-import edu.rice.historytree.NodeCursor;
-import edu.rice.historytree.TreeBase;
 
 /** Abstract class for verifying a history tree eagerly. I.e., Whenever the queue is processed, the entire batch is processed and verified.
  * */
