@@ -27,22 +27,25 @@ public class VerifyMerkle extends Verifier {
 
 	@Override
 	public void add(IMessage message) {
+	
 		TreeSigBlob sigblob = message.getSignatureBlob();
 
 		// Parse the tree.
 		MerkleTree<byte[], byte[]> parsed = parseMerkleTree(message);
 
 		// See if the message is in the tree.
-		if (!checkLeaf(message, parsed))
+		if (!checkLeaf(message, parsed)) {
 			message.signatureValidity(false);
-		
-		final byte[] rootHash = parsed.agg();
-		TreeSigMessage.Builder msgbuilder = TreeSigMessage.newBuilder()
-			.setTreetype(SigTreeType.MERKLE_TREE)
-			.setVersion(parsed.version())
-			.setRoothash(ByteString.copyFrom(rootHash));
-
-		message.signatureValidity(checkSig(sigblob, msgbuilder));
+		}
+		else {
+			final byte[] rootHash = parsed.agg();
+			TreeSigMessage.Builder msgbuilder = TreeSigMessage.newBuilder()
+				.setTreetype(SigTreeType.MERKLE_TREE)
+				.setVersion(parsed.version())
+				.setRoothash(ByteString.copyFrom(rootHash));
+	
+			message.signatureValidity(checkSig(sigblob, msgbuilder));
+		}
 	}
 	
 	@Override

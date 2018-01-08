@@ -39,7 +39,7 @@ public class HistTreeTools {
 			.setTreetype(SigTreeType.HISTORY_TREE)
 			.setVersion(parsed.version())
 			.setRoothash(ByteString.copyFrom(rootHash));
-	
+		
 		return Verifier.checkSig(signer, sigblob, msgbuilder);
 	}
 

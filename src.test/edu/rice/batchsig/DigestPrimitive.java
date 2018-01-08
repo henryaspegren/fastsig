@@ -4,15 +4,11 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 
+import org.apache.commons.codec.binary.Base64;
 
 import com.google.protobuf.ByteString;
-import com.sun.org.apache.xml.internal.security.utils.Base64;
 
-import edu.rice.batchsig.SignaturePrimitives;
-import edu.rice.historytree.generated.Serialization.SigTreeType;
 import edu.rice.historytree.generated.Serialization.TreeSigBlob;
-import edu.rice.historytree.generated.Serialization.TreeSigMessage;
-import edu.rice.historytree.generated.Serialization.TreeSigBlob.Builder;
 import edu.rice.historytree.generated.Serialization.TreeSigBlob.SignatureAlgorithm;
 
 
@@ -37,7 +33,7 @@ public class DigestPrimitive implements SignaturePrimitives {
 		try {
 			MessageDigest md=MessageDigest.getInstance("SHA-256");
 			md.update(data);
-			return Base64.encode(md.digest()).getBytes();
+			return Base64.encodeBase64(md.digest());
 		} catch (NoSuchAlgorithmException e) {
 			e.printStackTrace();
 			return null;

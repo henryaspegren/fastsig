@@ -17,23 +17,32 @@ public class TestHistoryQueue extends TestCase {
 		DigestPrimitive prims = new DigestPrimitive();
 		HistoryQueue signqueue=new HistoryQueue(prims);
 		
-		Object target1 = new Object();
-		Object target2 = new Object();
-		Object target3 = new Object();
-		Object target4 = new Object();
+		Object targetA = new Object(); 
+		Object targetB = new Object();
+		Object targetC = new Object();
+		Object targetD = new Object();
 
-		MessageWrap msg0 = new MessageWrap(1000).setRecipient(target1);
-		MessageWrap msg1 = new MessageWrap(1001).setRecipient(target1);
-		MessageWrap msg2 = new MessageWrap(1002).setRecipient(target2);
-		MessageWrap msg3 = new MessageWrap(1003).setRecipient(target3);
-		MessageWrap msg4 = new MessageWrap(1004).setRecipient(target2);
-		MessageWrap msg5 = new MessageWrap(1005).setRecipient(target1);
+		MessageWrap msg0 = new MessageWrap(1000).setRecipient(targetA); 
+ 		MessageWrap msg1 = new MessageWrap(1001).setRecipient(targetA); 
+		MessageWrap msg2 = new MessageWrap(1002).setRecipient(targetB); 
+		MessageWrap msg3 = new MessageWrap(1003).setRecipient(targetC); 
+		MessageWrap msg4 = new MessageWrap(1004).setRecipient(targetB); 
+		MessageWrap msg5 = new MessageWrap(1005).setRecipient(targetA); 
 
-		MessageWrap msg6 = new MessageWrap(1006).setRecipient(target3);
-		MessageWrap msg7 = new MessageWrap(1007).setRecipient(target2);
-		MessageWrap msg8 = new MessageWrap(1008).setRecipient(target4);
-		MessageWrap msg9 = new MessageWrap(1009).setRecipient(target2);
-
+		MessageWrap msg6 = new MessageWrap(1006).setRecipient(targetC); 
+		MessageWrap msg7 = new MessageWrap(1007).setRecipient(targetB); 
+		MessageWrap msg8 = new MessageWrap(1008).setRecipient(targetD); 
+		MessageWrap msg9 = new MessageWrap(1009).setRecipient(targetB); 
+		
+		//     MESSAGE FLOW VISUALIZATION
+		//     1000,1001,1002,1003,1004,1005 || 1006,1007,1008,1009
+		// A : 1000,1001,               1005 ||
+		// B : 			 1002,     1004,     ||      1007,     1009
+		// C : 				  1003,          || 1006,
+		// D : 								 ||	          1008,
+	
+		
+		/* Batch 1 */
 		signqueue.add(msg0);
 		signqueue.add(msg1);
 		signqueue.add(msg2);
@@ -45,11 +54,11 @@ public class TestHistoryQueue extends TestCase {
 		
 		assertEquals(msg0.getSignatureBlob().getLeaf(),0);
 		assertEquals(msg1.getSignatureBlob().getLeaf(),1);
+		assertEquals(msg2.getSignatureBlob().getLeaf(),2);
+		assertEquals(msg3.getSignatureBlob().getLeaf(),3);
+		assertEquals(msg4.getSignatureBlob().getLeaf(),4);
 		assertEquals(msg5.getSignatureBlob().getLeaf(),5);
-
-		//System.out.println(msg1.getSignatureBlob());
-		//System.out.println(msg2.getSignatureBlob());
-
+		
 		assertEquals(0,msg0.getSignatureBlob().getSpliceHintCount());
 		assertEquals(0,msg1.getSignatureBlob().getSpliceHintCount());
 		assertEquals(0,msg2.getSignatureBlob().getSpliceHintCount());
@@ -57,8 +66,7 @@ public class TestHistoryQueue extends TestCase {
 		assertEquals(0,msg4.getSignatureBlob().getSpliceHintCount());
 		assertEquals(0,msg5.getSignatureBlob().getSpliceHintCount());
 
-		//System.out.println(msg0.getSignatureBlob());
-		
+		/* Batch 2 */
 		signqueue.add(msg6);
 		signqueue.add(msg7);
 		signqueue.add(msg8);
@@ -67,17 +75,19 @@ public class TestHistoryQueue extends TestCase {
 		assertEquals(2,prims.signcount);
 
 		assertEquals(msg6.getSignatureBlob().getLeaf(),6);
+		assertEquals(msg7.getSignatureBlob().getLeaf(),7);
+		assertEquals(msg8.getSignatureBlob().getLeaf(),8);
 		assertEquals(msg9.getSignatureBlob().getLeaf(),9);
 
 		assertEquals(5,msg6.getSignatureBlob().getSpliceHint(0));
 		assertEquals(5,msg7.getSignatureBlob().getSpliceHint(0));
 		assertEquals(0,msg8.getSignatureBlob().getSpliceHintCount());
-		assertEquals(0,msg9.getSignatureBlob().getSpliceHintCount());
+		assertEquals(5,msg9.getSignatureBlob().getSpliceHint(0));
 	}
 	@Test
 	public void testVerify() {
 		DigestPrimitive prims = new DigestPrimitive();
-		HistoryQueue signqueue=new HistoryQueue(prims);
+		HistoryQueue signqueue = new HistoryQueue(prims);
 		
 		Object target1 = new Object();
 		Object target2 = new Object();
@@ -112,7 +122,7 @@ public class TestHistoryQueue extends TestCase {
 
 		// Now try to verify them, in one batch.
 		System.out.println("***** Verify Pass 1 *****");
-		VerifyQueue verifyqueue=new VerifyQueue(prims);
+		VerifyQueue verifyqueue = new VerifyQueue(prims);
 		
 		msg0.wantValid(); verifyqueue.add(msg0);
 		msg1.wantValid(); verifyqueue.add(msg1);
@@ -131,7 +141,7 @@ public class TestHistoryQueue extends TestCase {
 		System.out.println("***** Verify Pass 2 *****");
 		prims.reset();
 		assertEquals(0,prims.verifycount); // One for msg8, to a new recipient_host.
-		verifyqueue=new VerifyQueue(prims);
+		verifyqueue = new VerifyQueue(prims);
 		
 		msg0.wantValid(); verifyqueue.add(msg0);
 		msg1.wantValid(); verifyqueue.add(msg1);
@@ -154,7 +164,7 @@ public class TestHistoryQueue extends TestCase {
 
 	public void testVerify2() {
 		DigestPrimitive prims = new DigestPrimitive();
-		HistoryQueue signqueue=new HistoryQueue(prims);
+		HistoryQueue signqueue = new HistoryQueue(prims);
 		
 		Object targets[] = new Object[20];
 		for (int i=0 ; i < targets.length ; i++) {
@@ -170,6 +180,10 @@ public class TestHistoryQueue extends TestCase {
 		};
 
 		MessageWrap msgB[] = {
+				// TODO: This is very confusing - 
+				// is the repeat of message with data 1004 intentional 
+				// is this supposed to be treated as a single message
+				// accidentally sent twice or a repeated message 
 				new MessageWrap(1004).setRecipient(targets[2]), // B
 				new MessageWrap(1005).setRecipient(targets[4]), // D
 				new MessageWrap(1006).setRecipient(targets[0]), 
@@ -190,10 +204,9 @@ public class TestHistoryQueue extends TestCase {
 				new MessageWrap(1009).setRecipient(targets[0]), 
 		};
 		
-		HistoryQueue signqueue1=new HistoryQueue(prims);
-		playBatch(signqueue1,msgA);
-		playBatch(signqueue1,msgB);
-		playBatch(signqueue1,msgC);
+		playBatch(signqueue, msgA);
+		playBatch(signqueue, msgB);
+		playBatch(signqueue, msgC);
 		
 		VerifyQueue verify;
 		
@@ -234,12 +247,7 @@ public class TestHistoryQueue extends TestCase {
 		verify.process();
 		assertEquals(2,prims.verifycount); // One redundant hash; two in same group.
 		
-
-		
-		
-		
-		
-		
+		// TODO: split this off into a separate test case, Crosby just left this incomplete
 		// Alternate version, to test bad hashes histories, but good (local) signatures.
 		MessageWrap msgAalt[] = {
 				new MessageWrap(2000).setRecipient(targets[1]),
@@ -249,14 +257,12 @@ public class TestHistoryQueue extends TestCase {
 				new MessageWrap(2003).setRecipient(targets[4]), 
 		};
 		
-		
-		
 	}
-	static void playBatch(ProcessQueue queue, MessageWrap msg[]) {
+	static void playBatch(HistoryQueue queue, MessageWrap msg[]) {
 		play(queue,msg);
 		queue.process();
 	}
-	static void play(ProcessQueue queue, MessageWrap msg[]) {
+	static void play(HistoryQueue queue, MessageWrap msg[]) {
 		for (int i = 0 ; i < msg.length ; i++) {
 			queue.add(msg[i]);
 		}

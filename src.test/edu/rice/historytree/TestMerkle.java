@@ -70,10 +70,9 @@ public class TestMerkle extends TestCase {
 		AggregationInterface<String,String> aggobj = new ConcatAgg();
 		HistoryDataStoreInterface<String,String> datastore = new ArrayStore<String,String>();
 		MerkleTree<String,String> histtree=new MerkleTree<String,String>(aggobj,datastore);
-		
 		for (int i=0 ; i < length ; i++) {
 			histtree.append(NAMES[i]);
-		}
+		};
 		histtree.freeze();
 		return histtree;
 	}
@@ -96,6 +95,22 @@ public class TestMerkle extends TestCase {
 			assertEquals(results[length-1],clone.agg());
 		}
 	}
+
+
+	@Test
+	public void testPrunedVisualize() throws ProofError {
+		int length = 4;
+		HashStore<String, String> hstore = new HashStore<String, String>();
+		MerkleTree<String,String> tree = makeHistTree(length);
+		System.out.println(tree);
+		System.out.println("\n");
+		System.out.println(tree.agg());
+		System.out.println(tree.time);
+		MerkleTree<String,String> prunedTree = tree.makePruned(hstore);
+		System.out.println(prunedTree);
+		
+	}
+	
 	
 	@Test
 	public void testPruned() throws ProofError {
@@ -112,6 +127,7 @@ public class TestMerkle extends TestCase {
 	@Test	
 	public void testSerialization() throws InvalidProtocolBufferException {
 		MerkleTree<String,String> histtree= makeHistTree(11);
+		System.out.println(histtree.toString());
 		byte[] serialized = histtree.serializeTree();
 		MerkleTree<String,String> tree2 = parseSerialization(serialized);
 		System.out.println(tree2.toString("Unserial:"));

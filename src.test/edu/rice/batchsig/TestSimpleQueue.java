@@ -12,6 +12,8 @@ import junit.framework.TestCase;
 
 
 public class TestSimpleQueue extends TestCase {
+	// TODO: offset is unused and should be removed 
+	// this is just confusing 
 	public void insertAndProcess(int offset, ProcessQueue signqueue) {
 		MessageWrap msg1 = new MessageWrap(1001);
 		MessageWrap msg2 = new MessageWrap(1002);
@@ -35,12 +37,14 @@ public class TestSimpleQueue extends TestCase {
 		verifyqueue.add(msg3);
 		verifyqueue.process();
 
-		// The validity callback resets the targetValidity. Check to make sure it was invoked.
+		// The validity callback resets the targetValidity.
+		// Check to make sure it was invoked.
 		assertNull(msg1.targetvalidity);
 		assertNull(msg2.targetvalidity);
 		assertNull(msg3.targetvalidity);
-	}	@Test
- 
+	}	
+	
+	@Test
 	public void testInsertAndProcessSimple() {
 		insertAndProcess(1000, new SimpleQueue(new DigestPrimitive()));
     }
@@ -55,7 +59,7 @@ public class TestSimpleQueue extends TestCase {
 		insertAndProcess(1000, new HistoryQueue(new DigestPrimitive()));
     }
 	
-
+	@Test
 	public void testInsertAndProcessSimpleTwice() {
 		ProcessQueue queue = new SimpleQueue(new DigestPrimitive());
 		insertAndProcess(1000, queue);
@@ -63,13 +67,15 @@ public class TestSimpleQueue extends TestCase {
     }
 	
 	@Test
+	// TODO: bad test -- using the wrong queue!
     public void testInsertAndProcessMerkleTwice() {
-		ProcessQueue queue = new SimpleQueue(new DigestPrimitive());
+		ProcessQueue queue = new MerkleQueue(new DigestPrimitive());
 		insertAndProcess(1000, queue);
 		insertAndProcess(2000, queue);
     }
 
 	@Test
+	// TODO: also a bad test -- again using the wrong queue!
     public void testInsertAndProcessHistoryTwice() {
 		ProcessQueue queue = new SimpleQueue(new DigestPrimitive());
 		insertAndProcess(1000, queue);

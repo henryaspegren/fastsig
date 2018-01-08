@@ -86,7 +86,7 @@ public class HistoryQueue extends QueueBase<OMessage> implements SuspendableProc
 		 * current pruned tree building code does not support building pruned
 		 * trees around anything but the latest commitment. This means that we
 		 * cannot drop the tree lock to do RSA concurrently; the tree will grow
-		 * and we'll be unable to generating proofs.
+		 * and we'll be unable to generate proofs.
 		 *
 		 * TODO: If we fix that, then a simple many-readers/one-writers lock will 
 		 * allow concurrency between RSA, adding to the history tree and generating proofs.
@@ -139,7 +139,7 @@ public class HistoryQueue extends QueueBase<OMessage> implements SuspendableProc
 	 */
 	private void processMessage(OMessage message, int leaf_offset, TreeSigBlob.Builder template) {
 		try {
-			//System.out.format("Processing leaf %d for recipient host %s\n",leaf_offset, message.getRecipient().toString());
+			System.out.format("Processing leaf %d for recipient host %s\n",leaf_offset, message.getRecipient().toString());
 			// Make the pruned tree.
 			TreeBase<byte[], byte[]> pruned = histtree
 					.makePruned(new HashStore<byte[], byte[]>());
@@ -148,7 +148,7 @@ public class HistoryQueue extends QueueBase<OMessage> implements SuspendableProc
 			Object recipient = message.getRecipient();
 			if (lastcontacts.containsKey(recipient)) {
 				//System.out.println(lastcontacts.toString());
-				//System.out.println("Found a lastcontact at"+lastcontacts.get(recipient));
+				System.out.println("Found a lastcontact at "+lastcontacts.get(recipient));
 				int lastcontact = lastcontacts.get(recipient);
 				if (lastcontact != histtree.version()) {
 					pruned.copyV(histtree, lastcontacts.get(recipient),false);

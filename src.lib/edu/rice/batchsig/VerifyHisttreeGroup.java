@@ -8,7 +8,7 @@ import java.util.HashMap;
 import edu.rice.historytree.HistoryTree;
 
 /**
- * Verify all of the spliced signed messages in the queue while try to exploit
+ * Verify all of the spliced signed messages in the queue while trying to exploit
  * available splices. Exploit any splices that happen to be between messages in
  * the queue.
  */
@@ -43,7 +43,7 @@ public class VerifyHisttreeGroup extends VerifyHisttreeEagerlyBase {
 		HashMap<IMessage, HistoryTree<byte[], byte[]>> trees = new HashMap<IMessage, HistoryTree<byte[], byte[]>>();
 
 		for (IMessage m : l) {
-			// System.out.format("*Checking message at leaf %d\n",m.getSignatureBlob().getLeaf());
+			System.out.format("*Checking message at leaf %d\n",m.getSignatureBlob().getLeaf());
 
 			boolean validated = false;
 			HistoryTree<byte[], byte[]> tree = HistTreeTools
@@ -58,6 +58,9 @@ public class VerifyHisttreeGroup extends VerifyHisttreeEagerlyBase {
 			// See if this message can be spliced on to something we already
 			// know about.
 			if (splices.containsKey(version)) {
+				// TODO: confusion - later here refers to order in the list,
+				// 			actually it is a chronologically earlier version
+				//			<check this and add a note> 
 				IMessage latermsg = splices.get(version);
 				HistoryTree<byte[], byte[]> latertree = trees.get(latermsg);
 				// Confirm the splice.
@@ -65,8 +68,8 @@ public class VerifyHisttreeGroup extends VerifyHisttreeEagerlyBase {
 					// Splice is good! Is the message validated?
 					if (Verifier.checkLeaf(m, tree)) {
 						// And so is the message in it!
-						// System.out.format("Using verified splice %d in tree version %d\n",version,
-						// latertree.version());
+						System.out.format("Using verified splice %d in tree version %d\n",version,
+								latertree.version());
 						validated = true;
 					} else {
 						System.out
@@ -81,7 +84,7 @@ public class VerifyHisttreeGroup extends VerifyHisttreeEagerlyBase {
 			}
 			// No splice or invalid splice.
 			if (validated == false) {
-				// System.out.format("Splices do not have tree %d\n",version);
+				System.out.format("Splices do not have tree %d\n",version);
 				if (HistTreeTools.verifyHistoryRoot(signer, m, tree)) {
 					validated = true; // GOOD signature.
 				} else {
@@ -92,7 +95,7 @@ public class VerifyHisttreeGroup extends VerifyHisttreeEagerlyBase {
 
 			// Put in a 'splice' for the tree's version
 			if (validated && !splices.containsKey(version)) {
-				// System.out.format("Store self-splice at %d with tree-version %d\n",tree.version(),version);
+				System.out.format("Store self-splice at %d with tree-version %d\n",tree.version(),version);
 				splices.put(tree.version(), m);
 				trees.put(m, tree);
 			}
@@ -103,10 +106,10 @@ public class VerifyHisttreeGroup extends VerifyHisttreeEagerlyBase {
 				for (int splice : m.getSignatureBlob().getSpliceHintList()) {
 					if (tree.leaf(splice) == null) {
 						// Claims it has splice, but doesn't have the leaf.
-						// System.out.println("Claims splice, but no splice included.");
+						System.out.println("Claims splice, but no splice included.");
 					} else {
-						// System.out.format("Store splice at %d with tree-version %d\n",
-						// splice, version);
+						System.out.format("Store splice at %d with tree-version %d\n",
+								splice, version);
 						splices.put(splice, m);
 					}
 				}

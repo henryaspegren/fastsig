@@ -21,8 +21,7 @@ package edu.rice.historytree.aggs;
 
 
 import com.google.protobuf.ByteString;
-import com.sun.org.apache.xml.internal.security.exceptions.Base64DecodingException;
-import com.sun.org.apache.xml.internal.security.utils.Base64;
+import org.apache.commons.codec.binary.Base64;
 
 import edu.rice.historytree.AggregationInterface;
 
@@ -31,17 +30,12 @@ import edu.rice.historytree.AggregationInterface;
 public class SHA256AggB64 extends SHA256Agg {
 	@Override
 	public byte[] parseAgg(ByteString b) {
-		try {
-			return Base64.decode(b.toByteArray());
-		} catch (Base64DecodingException e) {
-			e.printStackTrace();
-			return null;
-		}
+		return Base64.decodeBase64(b.toByteArray());
 	}
 
 	@Override
 	public ByteString serializeAgg(byte[] agg) {
-		return ByteString.copyFromUtf8(Base64.encode(agg));
+		return ByteString.copyFromUtf8(Base64.encodeBase64String(agg));
 	}
 
 	@Override

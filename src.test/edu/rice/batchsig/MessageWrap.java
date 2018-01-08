@@ -4,7 +4,6 @@
 package edu.rice.batchsig;
 
 
-import edu.rice.batchsig.Message;
 import edu.rice.historytree.generated.Serialization.TreeSigBlob;
 
 /** Simple message creator that can store signatures and all the rest. */

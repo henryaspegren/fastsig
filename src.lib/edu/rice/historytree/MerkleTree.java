@@ -51,7 +51,7 @@ public class MerkleTree<A, V> extends TreeBase<A, V> {
 	public MerkleTree<A, V> makePruned(
 			HistoryDataStoreInterface<A, V> newdatastore) {
 		if (isFrozen == false)
-			throw new Error("Attempt to make pruned trees out of a unfrozen merkle tree");
+			throw new Error("Attempt to make pruned trees out of an unfrozen merkle tree");
 		MerkleTree<A, V> out = new MerkleTree<A, V>(this.aggobj, newdatastore);
 		out.updateTime(this.time);
 		out.root = out.datastore.makeRoot(root.layer());

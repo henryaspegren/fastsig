@@ -39,7 +39,7 @@ public class HistoryTree<A,V> extends TreeBase<A,V> {
 	}
 	@Override
 	public A agg() {
-    	return aggV(time);
+		return aggV(time);
     }
 
 	/** Get the aggregate at a particular historical version number */

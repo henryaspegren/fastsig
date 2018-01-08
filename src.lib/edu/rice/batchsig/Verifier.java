@@ -21,20 +21,10 @@ package edu.rice.batchsig;
 
 import java.util.Arrays;
 
-
-import com.google.protobuf.ByteString;
-
-import edu.rice.historytree.HistoryTree;
-import edu.rice.historytree.MerkleTree;
 import edu.rice.historytree.NodeCursor;
 import edu.rice.historytree.TreeBase;
-import edu.rice.historytree.aggs.SHA256Agg;
-import edu.rice.historytree.generated.Serialization.PrunedTree;
-import edu.rice.historytree.generated.Serialization.SigTreeType;
-import edu.rice.historytree.generated.Serialization.SignatureType;
 import edu.rice.historytree.generated.Serialization.TreeSigBlob;
 import edu.rice.historytree.generated.Serialization.TreeSigMessage;
-import edu.rice.historytree.storage.HashStore;
 
 /**
  * Various common functions useful for verifying Simple, Merkle, and Spliced

@@ -57,8 +57,8 @@ public class MerkleQueue extends QueueBase<OMessage> implements SuspendableProce
 		
 		AggregationInterface<byte[], byte[]> aggobj = new SHA256Agg();
 		ArrayStore<byte[], byte[]> datastore = new ArrayStore<byte[], byte[]>();
-		MerkleTree<byte[], byte[]> merkletree = new MerkleTree<byte[], byte[]>(
-				aggobj, datastore);
+		MerkleTree<byte[], byte[]> merkletree = 
+				new MerkleTree<byte[], byte[]>(aggobj, datastore);
 
 		// Add all of the messages to the Merkle tree.
 		for (Message m : oldqueue) {

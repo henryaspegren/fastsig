@@ -41,7 +41,13 @@ public class ArrayStore<A,V> extends ArrayStoreBase<A, V> {
 
 	@Override
 	public void markValid(NodeCursor<A, V> node) {
-		assert node.index() <= time : "Prob: "+ node.index() + " " +time;
+		// this assertion actually causes test failures
+		// in the case when we freeze a merkle tree with 
+		// a partially full subtree because this requires us to 
+		// mark nodes that have an index greater than the current 
+		// time as valid
+		//assert node.index() <= time : "Assertion Error - Time is less than index \nCurrent Index: "
+		//		+ node.index() + " Time: " +time;
 		aggvalid.set(node.computeIndex(), new Boolean(true));
 	}
 
@@ -49,8 +55,6 @@ public class ArrayStore<A,V> extends ArrayStoreBase<A, V> {
 	public void updateTime(int time) {
 		assert (time > this.time);
 		this.time = time;		
-
-		
 		while (time+1+1 > valstore.size()) // An extra +1 to handle hasVal's on extra nodes with emptyVal's inserted into a merkle tree.
 			valstore.add(null);
 		while (4*time+1 > aggstore.size()) {

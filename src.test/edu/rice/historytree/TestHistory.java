@@ -110,6 +110,27 @@ public class TestHistory extends TestCase {
 		}
 	}
 	
+	
+	
+	@Test
+	public void testPrunedVisualize() throws ProofError {
+		int length = 10;
+		HashStore<String,String> store = new HashStore<String,String>();
+		HistoryTree<String,String> tree = makeHistTree(length);
+		System.out.println("Original Tree");
+		System.out.println(tree);
+		System.out.println("Current Aggregate: "+tree.agg()+ " \t Version 3 Aggregate: "+tree.aggV(3));
+		HistoryTree<String,String> prunedTree = tree.makePruned(store);
+		System.out.println("pruned tree");
+		System.out.println(prunedTree);
+		System.out.println("Current Aggregate: "+prunedTree.agg());
+		prunedTree.copyV(tree, 3, false);
+		System.out.println("pruned tree with path to leaf version 3 added");
+		System.out.println(prunedTree);
+		System.out.println("Current Aggregate: "+prunedTree.agg()+ " \t Version 3 Aggregate: "+prunedTree.aggV(3));
+		
+	}
+	
 	@Test
 	public void testPruned() throws ProofError {
 		// Try around powers of 2.
@@ -143,7 +164,7 @@ public class TestHistory extends TestCase {
 		return tree2;
 	}	
 	HistoryTree<byte[],byte[]> 
-	makeShaHistTree() {
+			makeShaHistTree() {
 		List<String> x = Arrays.asList("Alan","Bob","Charlie","Dan","Elen","Frank","Gordon","Helen","Isis","Jon","Kevin");
 		AggregationInterface<byte[],byte[]> aggobj = new SHA256AggB64();
 		ArrayStore<byte[],byte[]> datastore = new ArrayStore<byte[],byte[]>();

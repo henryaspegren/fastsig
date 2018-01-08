@@ -327,6 +327,8 @@ public final class NodeCursor<A, V> {
 	void copyAgg(NodeCursor<A, V> orig) {
 		assert orig.getAgg() != null;
 		// System.out.println("CopyAgg:"+orig+ " ===> "+orig);
+		// first need to mark the node as valid
+		datastore.markValid(this);
 		datastore.setAgg(this, orig.getAgg());
 	}
 
