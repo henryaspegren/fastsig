@@ -23,7 +23,6 @@ import com.google.protobuf.ByteString;
 
 /** Interface for how aggregation is implemented. A is the type of an annotation, and 
  * V is the type of an event.*/
-
 public interface AggregationInterface<A, V> {
 	/** Factory for building aggregators, used to register aggregation schema's by name. */
 	public interface Factory<A, V> {

@@ -151,12 +151,14 @@ public abstract class TreeBase<A, V> {
 
 	/** Helper wrapper function for prettyprinting. */
 	private String aggToString(A a) {
-		return aggobj.serializeAgg(a).toStringUtf8();
+		//return aggobj.serializeAgg(a).toStringUtf8();
+		return a.toString();
 	}
 
 	/** Helper wrapper function for prettyprinting. */
 	private String valToString(V v) {
-		return aggobj.serializeVal(v).toStringUtf8();
+		// return aggobj.serializeVal(v).toStringUtf8();
+		return v.toString();
 	}
 
 	/** Serialize a pruned tree to a protocol buffer. */

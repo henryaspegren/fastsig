@@ -27,7 +27,7 @@ import com.google.protobuf.ByteString;
 import edu.rice.historytree.AggregationInterface;
 
 /**
- * Many aggreagate-by-cryptographic-hash functions are very similar to each
+ * Many aggregate-by-cryptographic-hash functions are very similar to each
  * other. the data being input and output is byte[]. This base class makes it
  * convenient to implement them.
  * 

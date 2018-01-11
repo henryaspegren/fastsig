@@ -148,7 +148,6 @@ public class TestHistory extends TestCase {
 		byte[] serialized = histtree.serializeTree();
 		HistoryTree<String,String> tree2 = parseSerialization(serialized);
 		System.out.println(tree2.toString("Unserial:"));
-		tree2.aggV(3);
 		assertEquals(histtree.agg(),tree2.agg());
 	}
 	

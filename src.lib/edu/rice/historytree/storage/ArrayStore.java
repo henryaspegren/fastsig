@@ -48,7 +48,7 @@ public class ArrayStore<A,V> extends ArrayStoreBase<A, V> {
 		// time as valid
 		//assert node.index() <= time : "Assertion Error - Time is less than index \nCurrent Index: "
 		//		+ node.index() + " Time: " +time;
-		aggvalid.set(node.computeIndex(), new Boolean(true));
+		aggvalid.set(node.computeIndex(), Boolean.valueOf(true));
 	}
 
 	@Override
@@ -59,7 +59,7 @@ public class ArrayStore<A,V> extends ArrayStoreBase<A, V> {
 			valstore.add(null);
 		while (4*time+1 > aggstore.size()) {
 			aggstore.add(null);
-			aggvalid.add(new Boolean(false));
+			aggvalid.add(Boolean.valueOf(false));
 		}
 	}
 
