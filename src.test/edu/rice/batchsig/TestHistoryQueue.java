@@ -3,7 +3,6 @@ package edu.rice.batchsig;
 import org.junit.Test;
 
 import edu.rice.batchsig.HistoryQueue;
-import edu.rice.batchsig.ProcessQueue;
 import edu.rice.batchsig.VerifyQueue;
 
 import junit.framework.TestCase;

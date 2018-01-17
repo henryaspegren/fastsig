@@ -36,6 +36,7 @@ import edu.rice.historytree.generated.Serialization.PrunedTree;
  *            Type of the value being stored.
  */
 public abstract class TreeBase<A, V> {
+
 	/** The current timestamp; the index of the last inserted event. */
 	protected int time;
 	/** The cursor position of the root. */
@@ -192,7 +193,9 @@ public abstract class TreeBase<A, V> {
 			return;
 		}
 		if (node.left() == null && node.right() == null) {
-			// Either a stub or a leaf.
+			// Either a stub or a leaf. 
+			//	TODO: documentation error? 
+			// 			can't be a leaf since we just checked that case
 			// Gotta include the agg for this node.
 			out.setAgg(aggobj.serializeAgg(node.getAgg()));
 			return;

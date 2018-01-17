@@ -32,6 +32,8 @@ import edu.rice.historytree.generated.Serialization;
  */
 
 public class HistoryTree<A,V> extends TreeBase<A,V> {
+		
+	
 	/** Make an empty merkle tree with a given aggobj and datastore.  */
 	public HistoryTree(AggregationInterface<A,V> aggobj,
 	    		   HistoryDataStoreInterface<A,V> datastore) {
@@ -58,13 +60,54 @@ public class HistoryTree<A,V> extends TreeBase<A,V> {
     		if (child.equals(left))
     			agg = aggobj.aggChildren(agg,null);
     		else {
-    			A leftagg = left.getAgg(); assert leftagg != null;
+    			A leftagg = left.getAgg();
+    			assert leftagg != null;
     			agg = aggobj.aggChildren(leftagg,agg);
     		}
     		child = node;
     		node = node.getParent(root);
     	}
     	return agg;
+    }
+    
+    /**
+     * Same spec as {@link #aggV(int)}, but also returns the 
+     * children along with the aggregation value.
+     * @param version
+     * @return
+     */
+    public AggWithChildren<A> aggVWithChildren(int version) {
+    	assert (version <= time);
+    	NodeCursor<A,V>  child, leaf, node;
+    	A leftagg = this.aggobj.emptyAgg();
+    	A rightagg = this.aggobj.emptyAgg();
+
+    	child = leaf = this.leaf(version);
+    	node = leaf.getParent(root);
+    	A agg = leaf.getAgg();
+		//System.out.println("leaf"+node);
+    	
+    	while (node!=null && version >= (1<<node.layer()-1)) {
+    		//System.out.println("aggv"+node);
+    		NodeCursor<A,V>  left = node.left();
+    		if (child.equals(left)) {
+    			// TDOO: this is a hack -- need to add a copy method to the 
+    			// aggregation interface spec
+    			leftagg = this.aggobj.parseAgg(this.aggobj.serializeAgg(agg));
+    			rightagg = this.aggobj.emptyAgg();
+    			agg = aggobj.aggChildren(agg,null);
+    		}
+    		else {
+    			leftagg = left.getAgg();
+    			rightagg = this.aggobj.parseAgg(this.aggobj.serializeAgg(agg));;
+    			assert leftagg != null;
+    			agg = aggobj.aggChildren(leftagg,agg);
+    		}
+    		child = node;
+    		node = node.getParent(root);
+    	}
+    	AggWithChildren<A> aggPlusChildren = new AggWithChildren<A>(agg, leftagg, rightagg);
+    	return aggPlusChildren;
     }
     
     //
@@ -78,6 +121,18 @@ public class HistoryTree<A,V> extends TreeBase<A,V> {
     	out.copySiblingAggs(this,this.leaf(time),out.forceLeaf(time),true);
     	return out;
         }
+    
+    
+    // Potentially implement later
+    public HistoryTree<A,V> makePrunedAtTime(HistoryDataStoreInterface<A,V> newdatastore,
+    		int version){
+    	assert false;
+    	HistoryTree<A,V> out = new HistoryTree<A,V>(this.aggobj, newdatastore);
+    	out.updateTime(version);
+    	out.root = out.datastore.makeRoot(root.layer());
+    	out.copySiblingAggs(this, this.leaf(version), out.forceLeaf(version), true);
+    	return out;
+    }
 
     @Override
     void parseSubtree(NodeCursor<A,V> node, Serialization.HistNode in) {

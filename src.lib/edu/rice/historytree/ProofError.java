@@ -21,7 +21,7 @@ package edu.rice.historytree;
 
 /** Used to indicate that some form of proof error has occurred */
 public class ProofError extends Exception {
-	ProofError(String text) {
+	public ProofError(String text) {
 		super(text);
 	}
 	

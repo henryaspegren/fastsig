@@ -54,4 +54,5 @@ public interface AggregationInterface<A, V> {
 	V parseVal(ByteString b);
 	/** Make a clone of this aggregation with the same fields. */
 	AggregationInterface<A, V> clone();
+	
 }

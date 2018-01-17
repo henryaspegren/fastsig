@@ -139,6 +139,25 @@ public class TestHistory extends TestCase {
 		}
 	}
 
+
+//	@Test
+//	public void testMakePrunedAtTime() throws ProofError {
+//		HistoryTree<String,String> tree = makeHistTree(10);
+//		
+//		HistoryDataStoreInterface<String,String> newdatastoreA = new ArrayStore<String, String>();
+//		HistoryDataStoreInterface<String,String> newdatastoreB = new ArrayStore<String, String>();
+//		HistoryTree<String,String> prunedTree = tree.makePruned(newdatastoreA);
+//		HistoryTree<String, String> prunedTreeAtTime3 = tree.makePrunedAtTime(newdatastoreB, 3);
+//		
+//		System.out.println(tree);
+//		System.out.println(tree.agg());
+//		System.out.println("-------");
+//		System.out.println(prunedTree);
+//		System.out.println(prunedTree.agg());
+//		System.out.println("-------");
+//		System.out.println(prunedTreeAtTime3);
+//		
+//	}
 	
 	// TO WRITE TESTS BELOW HERE.
 	
