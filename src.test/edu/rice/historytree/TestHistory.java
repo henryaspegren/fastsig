@@ -3,6 +3,7 @@ package edu.rice.historytree;
 import java.util.Arrays;
 import java.util.List;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -12,7 +13,6 @@ import edu.rice.historytree.generated.Serialization;
 import edu.rice.historytree.storage.AppendOnlyArrayStore;
 import edu.rice.historytree.storage.ArrayStore;
 import edu.rice.historytree.storage.HashStore;
-
 import junit.framework.TestCase;
 
 public class TestHistory extends TestCase {
@@ -113,21 +113,62 @@ public class TestHistory extends TestCase {
 	
 	@Test
 	public void testPrunedVisualize() throws ProofError {
-		int length = 10;
-		HashStore<String,String> store = new HashStore<String,String>();
+		int length = 5;
 		HistoryTree<String,String> tree = makeHistTree(length);
 		System.out.println("Original Tree");
 		System.out.println(tree);
-		System.out.println("Current Aggregate: "+tree.agg()+ " \t Version 3 Aggregate: "+tree.aggV(3));
-		HistoryTree<String,String> prunedTree = tree.makePruned(store);
-		System.out.println("pruned tree");
-		System.out.println(prunedTree);
-		System.out.println("Current Aggregate: "+prunedTree.agg());
-		prunedTree.copyV(tree, 3, false);
-		System.out.println("pruned tree with path to leaf version 3 added");
-		System.out.println(prunedTree);
-		System.out.println("Current Aggregate: "+prunedTree.agg()+ " \t Version 3 Aggregate: "+prunedTree.aggV(3));
+		System.out.println(tree.agg());
 		
+//		HashStore<String,String> store = new HashStore<String,String>();
+//		ConcatAgg agg = new ConcatAgg();
+//    	HistoryTree<String, String> out = new HistoryTree<String, String>(agg, store2);
+//		
+//    	out.updateTime(5);
+//    	int layer = TreeBase.log2(5);
+//    	out.root = out.datastore.makeRoot(layer);
+//    	
+//    	System.out.println(out);
+//    	out.copySiblingAggsPossiblyDifferentVersions(tree, tree.leaf(5), out.forceLeaf(5), true);
+//    	System.out.println(out);
+//    	System.out.println(out.agg());
+		
+
+		
+	}
+	
+	@Test
+	public void testGetAggAtV() throws ProofError{
+		int length = 12;
+		ConcatAgg concatAgg = new ConcatAgg();
+
+		HistoryTree<String,String> tree = makeHistTree(length);
+		NodeCursor<String, String> leaf5 = tree.leaf(5);
+		
+		// check the base case of a leaf
+		Assert.assertEquals(concatAgg.emptyAgg(), tree.getAggAtVersion(leaf5, 0));
+		Assert.assertEquals(leaf5.getAgg(), tree.getAggAtVersion(leaf5, 5));
+		
+		// now check the recursive case
+		NodeCursor<String, String> leaf5parent = leaf5.getParent(tree.root);
+		
+		Assert.assertEquals(concatAgg.aggChildren(tree.leaf(4).getAgg(), concatAgg.emptyAgg()), 
+				tree.getAggAtVersion(leaf5parent, 4));
+		Assert.assertEquals(concatAgg.aggChildren(tree.leaf(4).getAgg(), tree.leaf(5).getAgg()), 
+				tree.getAggAtVersion(leaf5parent, 5));
+		
+		NodeCursor<String,String> leaf5parentParent = leaf5parent.getParent(tree.root);
+		Assert.assertEquals(concatAgg.aggChildren(concatAgg.aggChildren(tree.leaf(4).getAgg(), concatAgg.emptyAgg()),
+				concatAgg.aggChildren(concatAgg.emptyAgg(),concatAgg.emptyAgg())), 
+				tree.getAggAtVersion(leaf5parentParent, 4));
+		Assert.assertEquals(concatAgg.aggChildren(concatAgg.aggChildren(tree.leaf(4).getAgg(), tree.leaf(5).getAgg()),
+				concatAgg.aggChildren(concatAgg.emptyAgg(),concatAgg.emptyAgg())), 
+				tree.getAggAtVersion(leaf5parentParent, 5));
+		Assert.assertEquals(concatAgg.aggChildren(concatAgg.aggChildren(tree.leaf(4).getAgg(), tree.leaf(5).getAgg()),
+				concatAgg.aggChildren(tree.leaf(6).getAgg(),concatAgg.emptyAgg())), 
+				tree.getAggAtVersion(leaf5parentParent, 6));
+		Assert.assertEquals(concatAgg.aggChildren(concatAgg.aggChildren(tree.leaf(4).getAgg(), tree.leaf(5).getAgg()),
+				concatAgg.aggChildren(tree.leaf(6).getAgg(),tree.leaf(7).getAgg())), 
+				tree.getAggAtVersion(leaf5parentParent, 7));		
 	}
 	
 	@Test
@@ -140,25 +181,6 @@ public class TestHistory extends TestCase {
 	}
 
 
-//	@Test
-//	public void testMakePrunedAtTime() throws ProofError {
-//		HistoryTree<String,String> tree = makeHistTree(10);
-//		
-//		HistoryDataStoreInterface<String,String> newdatastoreA = new ArrayStore<String, String>();
-//		HistoryDataStoreInterface<String,String> newdatastoreB = new ArrayStore<String, String>();
-//		HistoryTree<String,String> prunedTree = tree.makePruned(newdatastoreA);
-//		HistoryTree<String, String> prunedTreeAtTime3 = tree.makePrunedAtTime(newdatastoreB, 3);
-//		
-//		System.out.println(tree);
-//		System.out.println(tree.agg());
-//		System.out.println("-------");
-//		System.out.println(prunedTree);
-//		System.out.println(prunedTree.agg());
-//		System.out.println("-------");
-//		System.out.println(prunedTreeAtTime3);
-//		
-//	}
-	
 	// TO WRITE TESTS BELOW HERE.
 	
 	@Test	

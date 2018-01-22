@@ -69,7 +69,8 @@ public class HistoryTree<A,V> extends TreeBase<A,V> {
     	}
     	return agg;
     }
-    
+	
+	
     /**
      * Same spec as {@link #aggV(int)}, but also returns the 
      * children along with the aggregation value.
@@ -91,7 +92,7 @@ public class HistoryTree<A,V> extends TreeBase<A,V> {
     		//System.out.println("aggv"+node);
     		NodeCursor<A,V>  left = node.left();
     		if (child.equals(left)) {
-    			// TDOO: this is a hack -- need to add a copy method to the 
+    			// TODO: this is a hack -- need to add a copy method to the 
     			// aggregation interface spec
     			leftagg = this.aggobj.parseAgg(this.aggobj.serializeAgg(agg));
     			rightagg = this.aggobj.emptyAgg();
@@ -124,12 +125,14 @@ public class HistoryTree<A,V> extends TreeBase<A,V> {
     
     
     // Potentially implement later
-    public HistoryTree<A,V> makePrunedAtTime(HistoryDataStoreInterface<A,V> newdatastore,
+    public HistoryTree<A,V> makePruned(HistoryDataStoreInterface<A,V> newdatastore,
     		int version){
-    	assert false;
     	HistoryTree<A,V> out = new HistoryTree<A,V>(this.aggobj, newdatastore);
+    	// create a new history tree with the right time 
+    	// and version
     	out.updateTime(version);
-    	out.root = out.datastore.makeRoot(root.layer());
+    	int layer = log2(version);
+    	out.root = out.datastore.makeRoot(layer);
     	out.copySiblingAggs(this, this.leaf(version), out.forceLeaf(version), true);
     	return out;
     }

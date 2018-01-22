@@ -420,7 +420,7 @@ public abstract class TreeBase<A, V> {
 	 * @param origleaf
 	 *            The leaf in the original tree we're copying siblings from.
 	 * @param leaf
-	 *            The leaf in this tree we're copyingto.
+	 *            The leaf in this tree we're copying to.
 	 * @param force
 	 *            Do we copy siblings all the way to the root unconditionally?
 	 *            Used when the pruned tree violates the invariant of all but
@@ -428,7 +428,7 @@ public abstract class TreeBase<A, V> {
 	 * 
 	 * 
 	 * */
-	protected void copySiblingAggs(TreeBase<A, V> orig,
+	protected void copySiblingAggsOld(TreeBase<A, V> orig,
 			NodeCursor<A, V> origleaf, NodeCursor<A, V> leaf, boolean force) {
 		assert (orig.time == this.time); // Except for concurrent
 											// copies&updates, time shouldn't
@@ -448,8 +448,9 @@ public abstract class TreeBase<A, V> {
 		// a node with two siblings. we're done. Earlier inserts will have
 		// already inserted sibling hashes for ancestor nodes.
 		while (continuing && node != null) {
-			if (!force && node.left() != null && node.right() != null)
+			if (!force && node.left() != null && node.right() != null) {
 				continuing = false;
+			}
 			NodeCursor<A, V> origleft, origright;
 			origleft = orignode.left();
 			if (origleft != null && origleft.getAgg() != null)
@@ -460,6 +461,95 @@ public abstract class TreeBase<A, V> {
 			if (origright != null && origright.getAgg() != null)
 				node.forceRight().copyAgg(origright);
 
+			orignode = orignode.getParent(orig.root);
+			node = node.getParent(root);
+		}
+		// Handle the root-is-frozen case
+		if (root.isFrozen(time)) {
+			root.markValid();
+			root.copyAgg(orig.root);
+		}
+	}
+	
+	public A getAggAtVersion(NodeCursor<A,V> node, int version){
+		// can only look up aggs for past versions
+		assert (version <= time);
+		if(node == null) {
+			return this.aggobj.emptyAgg();
+		}
+		// if this agg is frozen at that version 
+		// then it will not have changed in the future so we can use it 
+		// straight away
+		if(node.isFrozen(version)) {
+			return node.getAgg();
+		}
+		// if it is a leaf and not frozen at version than 
+		// it must be null (empty)
+		if(node.isLeaf()) {
+			// TODO: seems like @crosby's code is inconsistent about 
+			// null vs empty nodes and aggs.....
+			// this might cause bugs and needs to be cleaned up
+			return this.aggobj.emptyAgg();
+		}
+		// otherwise calculate the left and right aggs recursively
+		A leftAgg, rightAgg;
+		leftAgg = this.getAggAtVersion(node.left(), version);
+		rightAgg = this.getAggAtVersion(node.right(), version);
+		A agg = this.aggobj.aggChildren(leftAgg, rightAgg);
+		return agg;
+	}
+    
+	
+	/**
+	 * Similar to {@link #copySiblingAggs(TreeBase, NodeCursor, NodeCursor, boolean)} but 
+	 * instead of only copying between two trees of the same version, we recompute 
+	 * non-frozen aggs to match the version of this tree. In other words the frozen 
+	 * aggs are simply copied, but non-frozen aggs are re-calculated according to the 
+	 * version of this tree
+	 * @param orig 
+	 * 			- tree from which to copy and recompute aggs
+	 * @param origleaf
+	 * 			- leaf to replicate in original tree along with the path 
+	 * @param leaf
+	 * 			- leaf to put into into
+	 * @param force
+	 * 			- same as {@link #copySiblingAggs(TreeBase, NodeCursor, NodeCursor, boolean)}
+	 */
+	protected void copySiblingAggs(TreeBase<A, V> orig,
+			NodeCursor<A, V> origleaf, NodeCursor<A, V> leaf, boolean force) {
+		int thisversion = this.version();
+		int origversion = orig.version();
+		// can only produce paths from past trees
+		assert thisversion <= origversion;
+		
+		NodeCursor<A, V> node, orignode;
+		orignode = origleaf.getParent(orig.root);
+		node = leaf.getParent(root);
+
+		boolean continuing = true;
+		
+		// Unlike in copySiblingAggs
+		// we may need to recompute certain aggregation values
+		// because the original tree may have more records and 
+		// have updated the aggregations
+		while (continuing && node != null) {
+			// this catches the case where we have already copied the 
+			// requisite data and so we don't need to waste time doing it 
+			// again
+			if (!force && node.left() != null && node.right() != null) {
+				continuing = false;
+			}
+			NodeCursor<A, V> origleft, origright;
+			origleft = orignode.left();
+			if (origleft != null && origleft.getAgg() != null) {
+				A aggAtVersion = orig.getAggAtVersion(origleft, thisversion);
+				node.forceLeft().setAggForce(aggAtVersion);
+			}
+			origright = orignode.right();
+			if (origright != null && origright.getAgg() != null) {
+				A aggAtVersion = orig.getAggAtVersion(origright, thisversion);
+				node.forceRight().setAggForce(aggAtVersion);
+			}
 			orignode = orignode.getParent(orig.root);
 			node = node.getParent(root);
 		}

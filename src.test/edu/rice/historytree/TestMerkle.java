@@ -7,12 +7,11 @@ import org.junit.Test;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 
-import edu.rice.historytree.*;
 import edu.rice.historytree.aggs.*;
 import edu.rice.historytree.generated.Serialization;
 import edu.rice.historytree.storage.ArrayStore;
 import edu.rice.historytree.storage.HashStore;
-
+import org.junit.Assert;
 import junit.framework.TestCase;
 
 public class TestMerkle extends TestCase {
@@ -99,16 +98,29 @@ public class TestMerkle extends TestCase {
 
 	@Test
 	public void testPrunedVisualize() throws ProofError {
-		int length = 4;
+		int length = 5;
 		HashStore<String, String> hstore = new HashStore<String, String>();
 		MerkleTree<String,String> tree = makeHistTree(length);
 		System.out.println(tree);
 		System.out.println("\n");
-		System.out.println(tree.agg());
-		System.out.println(tree.time);
+
 		MerkleTree<String,String> prunedTree = tree.makePruned(hstore);
+		prunedTree.copyV(tree, 2, true);
+
 		System.out.println(prunedTree);
+		System.out.println("\n");
 		
+		HashStore<String, String> hstore2 = new HashStore<String, String>();
+		MerkleTree<String, String> frombytes = new MerkleTree<String, String>(new ConcatAgg(), hstore2);
+		try {
+			frombytes.parseTree(prunedTree.serializeTree());
+			System.out.println(frombytes);
+
+		} catch (InvalidProtocolBufferException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			Assert.fail();
+		}
 	}
 	
 	
@@ -184,13 +196,13 @@ public class TestMerkle extends TestCase {
 			histtree=new MerkleTree<byte[],byte[]>(aggobj,datastore);
 			for (int j =0; j < LOOP ; j++) {
 				histtree.append(String.format("Foo%d",j).getBytes());
-
 			}
 			histtree.freeze();
 			if (doGetAgg)
 				histtree.agg();
 			if (doGetAggV)
 				;
+			System.out.println(histtree.toString("ORIGINAL: "));
 			if (doMakePrune||doAddPruned||doSerialize||doDeserialize||doVf) {
 				for (int j = 0 ; j < LOOP ; j++) {
 					HashStore<byte[],byte[]> datastore2 = new HashStore<byte[],byte[]>();
@@ -199,11 +211,12 @@ public class TestMerkle extends TestCase {
 						try {
 							clone.copyV(histtree, j, true);
 						} catch (ProofError e) {
+							Assert.fail();
 							e.printStackTrace();
 						}
 					}
 
-					//System.out.print(clone.toString("Clone:"));
+					System.out.print(clone.toString("Clone:"));
 					if (doDeserialize) {
 						byte[] data = clone.serializeTree();
 						if (doSerialize) {
@@ -213,8 +226,9 @@ public class TestMerkle extends TestCase {
 							} catch (InvalidProtocolBufferException e) {
 								e.printStackTrace();
 							}
-							//System.out.print(parsed.toString("Parsed:"));
+							System.out.print(parsed.toString("Parsed:"));
 							if (doVf) {
+								System.out.println(j);
 								assertTrue(Arrays.equals(parsed.agg(),histtree.agg()));
 								assertTrue(Arrays.equals(parsed.leaf(j).getVal(),String.format("Foo%d",j).getBytes()));
 								assertTrue(Arrays.equals(parsed.leaf(j).getAgg(),histtree.leaf(j).getAgg()));

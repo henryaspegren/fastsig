@@ -322,6 +322,16 @@ public final class NodeCursor<A, V> {
 		assert (v != null);
 		datastore.setAgg(this, v);
 	}
+	
+	/**
+	 * 
+	 * @param v
+	 */
+	void setAggForce(A v) {
+		assert (v != null);
+		datastore.markValid(this);
+		datastore.setAgg(this, v);
+	}
 
 	/** Copy the aggregate from the node pointed to by the cursor */
 	void copyAgg(NodeCursor<A, V> orig) {
