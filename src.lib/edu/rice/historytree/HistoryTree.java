@@ -70,6 +70,43 @@ public class HistoryTree<A,V> extends TreeBase<A,V> {
     	return agg;
     }
 	
+    @Override
+	public A getAggAtVersion(NodeCursor<A,V> node, int version){
+		// can only look up aggs for past versions
+		assert (version <= time);
+		// node doesn't exist
+		if(node == null) {
+			return null;
+		}
+		// if this agg is frozen at that version 
+		// then it will not have changed in the future so we can use it 
+		// straight away
+		if(node.isFrozen(version)) {
+			return node.getAgg();
+		}
+		// TODO: @Crosby seems to have been confused and used different
+		// semantics in Merkle and History trees. In Merkle trees
+		// we return empty aggregators, but in history trees
+		// we return nulls. This is confusing and should be resolved
+		// but for now we keep it so that the test cases are still
+		// okay
+		if(node.isLeaf()) {
+			return null;
+		}
+
+		// otherwise calculate the left and right aggs recursively
+		A leftAgg, rightAgg;
+		leftAgg = this.getAggAtVersion(node.left(), version);
+		rightAgg = this.getAggAtVersion(node.right(), version);
+		
+		if(leftAgg == null && rightAgg == null) {
+			return null;
+		}
+		
+		A agg = this.aggobj.aggChildren(leftAgg, rightAgg);
+		return agg;
+	}
+    
 	
     /**
      * Same spec as {@link #aggV(int)}, but also returns the 

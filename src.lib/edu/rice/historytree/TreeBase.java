@@ -306,7 +306,10 @@ public abstract class TreeBase<A, V> {
 
 	/**
 	 * Copy the path to a given leaf from the original tree into this (pruned)
-	 * tree.
+	 * tree. If the trees are different versions than the aggs are recomputed
+	 * according to the version of this tree! (so it may be more than 
+	 * just copying them!) If the trees are the same version than the 
+	 * values on the path are simply copied.
 	 * 
 	 * @param leafnum
 	 *            Which leaf to copy?
@@ -361,6 +364,15 @@ public abstract class TreeBase<A, V> {
 
 	/** Compute the aggregate value for a subtree. */
 	abstract public A agg();
+	
+	/**
+	 * 
+	 * @param origleft
+	 * @param thisversion
+	 * @return
+	 */
+	abstract public A getAggAtVersion(NodeCursor<A, V> origleft, int thisversion);
+
 
 	/**
 	 * Parse from a protocol buffer. I assume that 'this' history tree has been
@@ -406,14 +418,20 @@ public abstract class TreeBase<A, V> {
 		}
 		return false;
 	}
-
+	
 	/**
-	 * Traverse from a leaf to the root, copying any sibling agg objects, as
-	 * appropriate.
+	 * Traverse from a leaf to the root, copying or re-calculating 
+	 * any sibling agg objects, as appropriate.
 	 * 
 	 * To make a well-formed pruned tree, we need to include a path to whatever
 	 * leaf. We also need to ensure that each sibling node on that path that is
 	 * a stub also has an agg.
+	 * 
+	 * Instead of only copying between two trees of the same version, we recompute 
+	 * non-frozen aggs to match the version of this tree. In other words the frozen 
+	 * aggs are simply copied, but non-frozen aggs are re-calculated according to the 
+	 * version of this tree
+	 * 
 	 * 
 	 * @param orig
 	 *            The original tree.
@@ -428,93 +446,6 @@ public abstract class TreeBase<A, V> {
 	 * 
 	 * 
 	 * */
-	protected void copySiblingAggsOld(TreeBase<A, V> orig,
-			NodeCursor<A, V> origleaf, NodeCursor<A, V> leaf, boolean force) {
-		assert (orig.time == this.time); // Except for concurrent
-											// copies&updates, time shouldn't
-											// change.
-		NodeCursor<A, V> node, orignode;
-		orignode = origleaf.getParent(orig.root);
-		node = leaf.getParent(root);
-
-		// Do we continue up the tree?
-		boolean continuing = true;
-		// Invariant: We have a well-formed tree with all stubs include hashes
-		// EXCEPT possibly siblings in the path from the given leaf to where it
-		// merged
-		// into the existing pruned tree.
-
-		// Iterate up the tree, copying over sibling agg's for stubs. If we hit
-		// a node with two siblings. we're done. Earlier inserts will have
-		// already inserted sibling hashes for ancestor nodes.
-		while (continuing && node != null) {
-			if (!force && node.left() != null && node.right() != null) {
-				continuing = false;
-			}
-			NodeCursor<A, V> origleft, origright;
-			origleft = orignode.left();
-			if (origleft != null && origleft.getAgg() != null)
-				node.forceLeft().copyAgg(origleft);
-
-			// A right node may or may not exist.
-			origright = orignode.right();
-			if (origright != null && origright.getAgg() != null)
-				node.forceRight().copyAgg(origright);
-
-			orignode = orignode.getParent(orig.root);
-			node = node.getParent(root);
-		}
-		// Handle the root-is-frozen case
-		if (root.isFrozen(time)) {
-			root.markValid();
-			root.copyAgg(orig.root);
-		}
-	}
-	
-	public A getAggAtVersion(NodeCursor<A,V> node, int version){
-		// can only look up aggs for past versions
-		assert (version <= time);
-		if(node == null) {
-			return this.aggobj.emptyAgg();
-		}
-		// if this agg is frozen at that version 
-		// then it will not have changed in the future so we can use it 
-		// straight away
-		if(node.isFrozen(version)) {
-			return node.getAgg();
-		}
-		// if it is a leaf and not frozen at version than 
-		// it must be null (empty)
-		if(node.isLeaf()) {
-			// TODO: seems like @crosby's code is inconsistent about 
-			// null vs empty nodes and aggs.....
-			// this might cause bugs and needs to be cleaned up
-			return this.aggobj.emptyAgg();
-		}
-		// otherwise calculate the left and right aggs recursively
-		A leftAgg, rightAgg;
-		leftAgg = this.getAggAtVersion(node.left(), version);
-		rightAgg = this.getAggAtVersion(node.right(), version);
-		A agg = this.aggobj.aggChildren(leftAgg, rightAgg);
-		return agg;
-	}
-    
-	
-	/**
-	 * Similar to {@link #copySiblingAggs(TreeBase, NodeCursor, NodeCursor, boolean)} but 
-	 * instead of only copying between two trees of the same version, we recompute 
-	 * non-frozen aggs to match the version of this tree. In other words the frozen 
-	 * aggs are simply copied, but non-frozen aggs are re-calculated according to the 
-	 * version of this tree
-	 * @param orig 
-	 * 			- tree from which to copy and recompute aggs
-	 * @param origleaf
-	 * 			- leaf to replicate in original tree along with the path 
-	 * @param leaf
-	 * 			- leaf to put into into
-	 * @param force
-	 * 			- same as {@link #copySiblingAggs(TreeBase, NodeCursor, NodeCursor, boolean)}
-	 */
 	protected void copySiblingAggs(TreeBase<A, V> orig,
 			NodeCursor<A, V> origleaf, NodeCursor<A, V> leaf, boolean force) {
 		int thisversion = this.version();
@@ -543,12 +474,16 @@ public abstract class TreeBase<A, V> {
 			origleft = orignode.left();
 			if (origleft != null && origleft.getAgg() != null) {
 				A aggAtVersion = orig.getAggAtVersion(origleft, thisversion);
-				node.forceLeft().setAggForce(aggAtVersion);
+				if(aggAtVersion != null) {
+					node.forceLeft().setAggForce(aggAtVersion);
+				}
 			}
 			origright = orignode.right();
 			if (origright != null && origright.getAgg() != null) {
 				A aggAtVersion = orig.getAggAtVersion(origright, thisversion);
-				node.forceRight().setAggForce(aggAtVersion);
+				if(aggAtVersion != null) {
+					node.forceRight().setAggForce(aggAtVersion);
+				}
 			}
 			orignode = orignode.getParent(orig.root);
 			node = node.getParent(root);
@@ -559,7 +494,7 @@ public abstract class TreeBase<A, V> {
 			root.copyAgg(orig.root);
 		}
 	}
-
+	
 	/** Return ceil(log_2(x)) */
 	public static int log2(int x) {
 		int i = 0, pow = 1;

@@ -103,6 +103,49 @@ public class MerkleTree<A, V> extends TreeBase<A, V> {
 			return aggobj.emptyAgg();
 		return root.getAgg();
 	}
+	
+
+	@Override
+	public A getAggAtVersion(NodeCursor<A,V> node, int version){
+		if(!isFrozen) {
+			throw new Error("Cannot compute agg from unfrozen MerkleTree");
+		}
+		// can only look up aggs for past versions
+		assert (version <= time);
+		
+		// node doesn't exist we pass it back up
+		if(node == null) {
+			return null;
+		}
+		// if this agg is frozen at that version 
+		// then it will not have changed in the future so we can use it 
+		// straight away
+		if(node.isFrozen(version)) {
+			return node.getAgg();
+		}
+		// TODO: @Crosby seems to have been confused and used different
+		// semantics in Merkle and History trees. In Merkle trees
+		// we return empty aggregators, but in history trees
+		// we return nulls. This is confusing and should be resolved
+		// but for now we keep it so that the test cases are still
+		// okay
+		if(node.isLeaf()) {
+			return aggobj.emptyAgg();
+		}
+
+		// otherwise calculate the left and right aggs recursively
+		A leftAgg, rightAgg;
+		leftAgg = this.getAggAtVersion(node.left(), version);
+		rightAgg = this.getAggAtVersion(node.right(), version);
+		
+		if(leftAgg == null && rightAgg == null) {
+			return aggobj.emptyAgg();
+		}
+		
+		A agg = this.aggobj.aggChildren(leftAgg, rightAgg);
+		return agg;
+	}
+    
 
 	@Override
 	public void parseTree(Serialization.PrunedTree in) {

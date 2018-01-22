@@ -110,32 +110,6 @@ public class TestHistory extends TestCase {
 	}
 	
 	
-	
-	@Test
-	public void testPrunedVisualize() throws ProofError {
-		int length = 5;
-		HistoryTree<String,String> tree = makeHistTree(length);
-		System.out.println("Original Tree");
-		System.out.println(tree);
-		System.out.println(tree.agg());
-		
-//		HashStore<String,String> store = new HashStore<String,String>();
-//		ConcatAgg agg = new ConcatAgg();
-//    	HistoryTree<String, String> out = new HistoryTree<String, String>(agg, store2);
-//		
-//    	out.updateTime(5);
-//    	int layer = TreeBase.log2(5);
-//    	out.root = out.datastore.makeRoot(layer);
-//    	
-//    	System.out.println(out);
-//    	out.copySiblingAggsPossiblyDifferentVersions(tree, tree.leaf(5), out.forceLeaf(5), true);
-//    	System.out.println(out);
-//    	System.out.println(out.agg());
-		
-
-		
-	}
-	
 	@Test
 	public void testGetAggAtV() throws ProofError{
 		int length = 12;
@@ -145,26 +119,26 @@ public class TestHistory extends TestCase {
 		NodeCursor<String, String> leaf5 = tree.leaf(5);
 		
 		// check the base case of a leaf
-		Assert.assertEquals(concatAgg.emptyAgg(), tree.getAggAtVersion(leaf5, 0));
+		Assert.assertEquals(null, tree.getAggAtVersion(leaf5, 0));
 		Assert.assertEquals(leaf5.getAgg(), tree.getAggAtVersion(leaf5, 5));
 		
 		// now check the recursive case
 		NodeCursor<String, String> leaf5parent = leaf5.getParent(tree.root);
 		
-		Assert.assertEquals(concatAgg.aggChildren(tree.leaf(4).getAgg(), concatAgg.emptyAgg()), 
+		Assert.assertEquals(concatAgg.aggChildren(tree.leaf(4).getAgg(), null), 
 				tree.getAggAtVersion(leaf5parent, 4));
 		Assert.assertEquals(concatAgg.aggChildren(tree.leaf(4).getAgg(), tree.leaf(5).getAgg()), 
 				tree.getAggAtVersion(leaf5parent, 5));
 		
 		NodeCursor<String,String> leaf5parentParent = leaf5parent.getParent(tree.root);
-		Assert.assertEquals(concatAgg.aggChildren(concatAgg.aggChildren(tree.leaf(4).getAgg(), concatAgg.emptyAgg()),
-				concatAgg.aggChildren(concatAgg.emptyAgg(),concatAgg.emptyAgg())), 
+		Assert.assertEquals(concatAgg.aggChildren(concatAgg.aggChildren(tree.leaf(4).getAgg(), null),
+				null), 
 				tree.getAggAtVersion(leaf5parentParent, 4));
 		Assert.assertEquals(concatAgg.aggChildren(concatAgg.aggChildren(tree.leaf(4).getAgg(), tree.leaf(5).getAgg()),
-				concatAgg.aggChildren(concatAgg.emptyAgg(),concatAgg.emptyAgg())), 
+				null), 
 				tree.getAggAtVersion(leaf5parentParent, 5));
 		Assert.assertEquals(concatAgg.aggChildren(concatAgg.aggChildren(tree.leaf(4).getAgg(), tree.leaf(5).getAgg()),
-				concatAgg.aggChildren(tree.leaf(6).getAgg(),concatAgg.emptyAgg())), 
+				concatAgg.aggChildren(tree.leaf(6).getAgg(),null)), 
 				tree.getAggAtVersion(leaf5parentParent, 6));
 		Assert.assertEquals(concatAgg.aggChildren(concatAgg.aggChildren(tree.leaf(4).getAgg(), tree.leaf(5).getAgg()),
 				concatAgg.aggChildren(tree.leaf(6).getAgg(),tree.leaf(7).getAgg())), 

@@ -110,6 +110,8 @@ public class TestMerkle extends TestCase {
 		System.out.println(prunedTree);
 		System.out.println("\n");
 		
+
+		
 		HashStore<String, String> hstore2 = new HashStore<String, String>();
 		MerkleTree<String, String> frombytes = new MerkleTree<String, String>(new ConcatAgg(), hstore2);
 		try {
