@@ -20,6 +20,9 @@
 package edu.rice.historytree;
 
 
+import java.util.ArrayList;
+import java.util.List;
+
 import edu.rice.historytree.generated.Serialization;
 
 
@@ -32,7 +35,11 @@ import edu.rice.historytree.generated.Serialization;
  */
 
 public class HistoryTree<A,V> extends TreeBase<A,V> {
-		
+	
+	/** Used for passing in a function */
+	public interface FilterFunction<A>{
+		boolean valid(A other);
+	}
 	
 	/** Make an empty merkle tree with a given aggobj and datastore.  */
 	public HistoryTree(AggregationInterface<A,V> aggobj,
@@ -161,7 +168,17 @@ public class HistoryTree<A,V> extends TreeBase<A,V> {
         }
     
     
-    // Potentially implement later
+    /**
+     * This is similar to the make pruned method except the version of the 
+     * the new tree is a parameter rather than just being fixed to the version of 
+     * the original tree. This allows us to construct pruned trees and associated
+     * proofs for previous versions of the tree (e.g. in a commitment scheme 
+     * with delayed commitments). This could also be used to help scale
+     * the construction of proofs via parallelization. 
+     * @param newdatastore
+     * @param version
+     * @return
+     */
     public HistoryTree<A,V> makePruned(HistoryDataStoreInterface<A,V> newdatastore,
     		int version){
     	HistoryTree<A,V> out = new HistoryTree<A,V>(this.aggobj, newdatastore);
@@ -172,6 +189,64 @@ public class HistoryTree<A,V> extends TreeBase<A,V> {
     	out.root = out.datastore.makeRoot(layer);
     	out.copySiblingAggs(this, this.leaf(version), out.forceLeaf(version), true);
     	return out;
+    }
+    
+    /**
+     * A function that checks if the correct stubs are present.
+     * A stub is defined as any interior node that represents an 
+     * ommited subtree. 
+     * @param function a filter function that takes in an aggregation
+     * 	and returns True if the subtree should be ommitted
+     *  and returns False if the subtree should not be ommitted.
+     * @return
+     */
+    public boolean checkStubs(FilterFunction<A> function) {
+    	return checkStubsHelper(function, this.root);
+    }
+    
+    private boolean checkStubsHelper(FilterFunction<A> function, NodeCursor<A,V> node) {
+//    	System.out.println("Node");
+//    	System.out.println(node);
+    	if(node == null) {
+    		return true;
+    	}
+    	if(node.isLeaf()) {
+    		return true;
+    	}
+//       	System.out.println("L");
+//       	System.out.println(node.left());
+//    	System.out.println("R");
+//    	System.out.println(node.right());
+    	// this is a "stub" in the sense that it replaces
+    	// a full subtree 
+    	if(node.left() == null && node.right() == null) {
+//    		System.out.println("STUB - ");
+//    		System.out.println(function.stubValid(node.getAgg()));
+    		return function.valid(node.getAgg()); 
+    	}
+		return (checkStubsHelper(function, node.left()) && 
+				checkStubsHelper(function, node.right()));
+    }
+    
+    public List<Integer> getValueIndicies(FilterFunction<A> function){
+    	return this.getValuesHelper(function, this.root);
+    }
+    
+    private List<Integer> getValuesHelper(FilterFunction<A> function, NodeCursor<A,V> node){
+		List<Integer> res = new ArrayList<Integer>();
+    	if(node == null) {
+    		return res;
+    	}
+    	if(node.isLeaf()) {
+    		if(function.valid(node.getAgg())) {
+    			res.add(node.index());
+    		}
+    		return res;
+    	}
+    	List<Integer> resLeft = this.getValuesHelper(function, node.left());
+    	List<Integer> resRight = this.getValuesHelper(function, node.right());
+    	resLeft.addAll(resRight);
+    	return resLeft;
     }
 
     @Override

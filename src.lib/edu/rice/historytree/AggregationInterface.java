@@ -28,7 +28,7 @@ public interface AggregationInterface<A, V> {
 	public interface Factory<A, V> {
 		AggregationInterface<A, V> newInstance();
 		String name();
-	}	
+	}
 	
     /** Get the name of this aggregation function. */
 	String getName();

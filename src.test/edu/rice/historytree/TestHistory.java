@@ -1,5 +1,6 @@
 package edu.rice.historytree;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -90,7 +91,6 @@ public class TestHistory extends TestCase {
 		return histtree;
 	}
 	
-
 	void doTestMakePruned(int length, HistoryDataStoreInterface<String,String> datastore) throws ProofError {
 		HistoryTree<String,String> tree=makeHistTree(length);
 
@@ -143,6 +143,30 @@ public class TestHistory extends TestCase {
 		Assert.assertEquals(concatAgg.aggChildren(concatAgg.aggChildren(tree.leaf(4).getAgg(), tree.leaf(5).getAgg()),
 				concatAgg.aggChildren(tree.leaf(6).getAgg(),tree.leaf(7).getAgg())), 
 				tree.getAggAtVersion(leaf5parentParent, 7));		
+	}
+	
+	
+	@Test 
+	public void testPrunedTreePreviousVersion() {
+		String mynames[] = Arrays.copyOf(NAMES,12);
+		ArrayStore<String, String> store = new ArrayStore<String, String>();
+		AggregationInterface<String,String> aggobj = new ConcatAgg();
+		HistoryTree<String,String> histtree = new HistoryTree<String,String>(aggobj,store);
+
+		for(int i=0; i < 10; i++) {
+			histtree.append(NAMES[i]);
+		}
+		
+		for(int i=0; i < 10; i++) {
+			ArrayStore<String, String> prunedStore = new ArrayStore<String, String>();
+			// make a pruned tree at version i 
+			HistoryTree<String, String> pruned = histtree.makePruned(prunedStore, i);	
+			System.out.println(pruned);
+			// check that the agg is correct
+			Assert.assertEquals(histtree.aggV(i), pruned.agg());
+			// and that the leaf is correct
+			Assert.assertEquals(histtree.leaf(i).getAgg(), pruned.leaf(i).getAgg());
+		}
 	}
 	
 	@Test
@@ -315,6 +339,67 @@ public class TestHistory extends TestCase {
 			benchTestCore(8,10,false,false,false,true,true,true,true);
 			benchTestCore(13,10,false,false,false,true,true,true,true);
 		}
+	}
+	
+	@Test
+	public void testCheckStubs() {
+		HistoryTree<String, String> tree = this.makeHistTree(10);
+		HistoryTree<String, String> pruned = tree.makePruned(new ArrayStore<String, String>());
+
+		// make sure it identifies the correct stub
+		Assert.assertTrue(pruned.checkStubs(other -> 
+			{return other.equals(tree.aggV(7));}));
+		
+		HistoryTree<String, String> prunedWithPathToFirstNode = tree.makePruned(new 
+				ArrayStore<String,String>(), tree.version());
+		try {
+			prunedWithPathToFirstNode.copyV(tree, 0, true);
+			
+			// here there are two stubs it should pull out
+			boolean res = prunedWithPathToFirstNode.checkStubs(other -> {
+					return other.equals("[[E,F],[G,H]]") ||
+							other.equals("[C,D]");});
+			Assert.assertTrue(res);		
+		} catch (ProofError e) {
+			e.printStackTrace();
+			Assert.fail();
+		}		
+	}
+	
+	@Test
+	public void testGetValueIndicies() {
+		HistoryTree<String, String> tree = this.makeHistTree(10);
+		List<Integer> res = tree.getValueIndicies(val -> {
+			return val.equals("A") || val.equals("D") || val.equals("F");
+		});
+		List<Integer> correct = new ArrayList<Integer>();
+		correct.add(0);
+		correct.add(3);
+		correct.add(5);
+		Assert.assertEquals(correct, res);
+	}
+	
+	@Test
+	public void testGetValueIndiciesPruned() {
+		HistoryTree<String, String> tree = this.makeHistTree(10);
+		HistoryTree<String, String> pruned = tree.makePruned(new ArrayStore<String, String>());
+		try {
+			pruned.copyV(tree, 3, true);
+			pruned.copyV(tree, 4, true);
+
+		} catch (ProofError e) {
+			e.printStackTrace();
+			Assert.fail();
+		}
+		List<Integer> res = pruned.getValueIndicies(val -> {
+			return val.equals("A") || val.equals("D") || val.equals("F");
+		});
+		List<Integer> correct = new ArrayList<Integer>();
+		// since A is not in the pruned tree it should not be 
+		// returned as an index
+		correct.add(3);
+		correct.add(5);
+		Assert.assertEquals(correct, res);
 	}
 }
 

@@ -293,11 +293,14 @@ public abstract class TreeBase<A, V> {
 			leaf.setAgg(aggobj.aggVal(leaf.getVal()));
 		}
 		NodeCursor<A, V> node = leaf.getParent(root);
-		// System.out.println("Adding leaf "+leaf+" ------------------------ "
-		// );
+//		 System.out.println("Adding leaf "+leaf+" ------------------------ "
+//		 );
 		while (node != null && node.isFrozen(time)) {
 			assert (node.getAgg() == null);
-			// System.out.println("Adding leaf "+leaf+" visit node" +node);
+//			System.out.println("Adding leaf "+leaf+" visit node" +node);
+//			System.out.println(node);
+//			System.out.println(node.left().getAgg());
+//			System.out.println(node.right().getAgg());
 			node.setAgg(aggobj.aggChildren(node.left().getAgg(), node.right()
 					.getAgg()));
 			node = node.getParent(root);
@@ -459,7 +462,7 @@ public abstract class TreeBase<A, V> {
 
 		boolean continuing = true;
 		
-		// Unlike in copySiblingAggs
+		// Unlike in original copySiblingAggs
 		// we may need to recompute certain aggregation values
 		// because the original tree may have more records and 
 		// have updated the aggregations
@@ -488,11 +491,22 @@ public abstract class TreeBase<A, V> {
 			orignode = orignode.getParent(orig.root);
 			node = node.getParent(root);
 		}
-		// Handle the root-is-frozen case
-		if (root.isFrozen(time)) {
+		
+		// edge case of a single entry 
+		if (thisversion == 0) {
 			root.markValid();
-			root.copyAgg(orig.root);
+			root.setAggForce(orig.leaf(0).getAgg());
 		}
+		
+//		// Handle the root-is-frozen case
+//		if (root.isFrozen(time)) {
+//			System.out.println(thisversion);
+//			System.out.println(orignode);
+//
+//			System.out.println(orig.getAggAtVersion(orignode, thisversion));
+//			root.markValid();
+//			root.setAggForce(orig.getAggAtVersion(orignode, thisversion));
+//		}
 	}
 	
 	/** Return ceil(log_2(x)) */
