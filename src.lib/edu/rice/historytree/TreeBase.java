@@ -385,6 +385,8 @@ public abstract class TreeBase<A, V> {
 		this.time = in.getVersion();
 		if (in.hasRoot()) {
 			root = datastore.makeRoot(log2(in.getVersion()));
+			// ?
+			datastore.updateTime(this.time);
 			parseSubtree(root, in.getRoot());
 		}
 	}
