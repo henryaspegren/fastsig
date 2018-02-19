@@ -20,12 +20,7 @@
 package edu.rice.batchsig;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
 
-import edu.rice.historytree.HistoryTree;
 import edu.rice.historytree.generated.Serialization.SignatureType;
 import edu.rice.historytree.generated.Serialization.TreeSigBlob;
 
