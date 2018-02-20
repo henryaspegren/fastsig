@@ -1,5 +1,5 @@
 #! /bin/bash
 
-mkdir src.generated
+mkdir src/generated
 protoc --java_out=src.generated proofs.proto
 

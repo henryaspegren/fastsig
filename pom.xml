@@ -1,39 +1,15 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>fastsig</groupId>
+  <groupId>b_verify</groupId>
   <artifactId>fastsig</artifactId>
+   <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.source>1.9</maven.compiler.source>
+    <maven.compiler.target>1.9</maven.compiler.target>
+  </properties>
   <build>
-    <sourceDirectory>src.bench</sourceDirectory>
-    <testSourceDirectory>src.test</testSourceDirectory>
-    <resources>
-      <resource>
-        <directory>src.bench</directory>
-        <excludes>
-          <exclude>**/*.java</exclude>
-        </excludes>
-      </resource>
-      <resource>
-        <directory>lib</directory>
-        <excludes>
-          <exclude>**/*.java</exclude>
-        </excludes>
-      </resource>
-      <resource>
-        <directory>src.lib</directory>
-        <excludes>
-          <exclude>**/*.java</exclude>
-        </excludes>
-      </resource>
-    </resources>
-    <plugins>
-      <plugin>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.7.0</version>
-        <configuration>
-          <release>9</release>
-        </configuration>
-      </plugin>
-    </plugins>
+  	<sourceDirectory>src</sourceDirectory>
+  	<testSourceDirectory>test</testSourceDirectory>
   </build>
   <dependencies>
 	  <!-- https://mvnrepository.com/artifact/commons-cli/commons-cli -->
@@ -90,8 +66,11 @@
 		<artifactId>bb-util</artifactId>
 		<version>1.0</version>
 		<scope>system</scope>
-		<systemPath>${basedir}/lib/bb.jar</systemPath>
+		<systemPath>${pom.basedir}/lib/bb.jar</systemPath>
 </dependency>
   </dependencies>
-  <version>1</version>
+  <version>2.0</version>
+  <name>HistoryTree Datastructure For b_verify</name>
+  <description>This was adapted and modified from the fastsig library created by @Scott Crosby
+</description>
 </project>

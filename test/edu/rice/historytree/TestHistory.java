@@ -9,7 +9,8 @@ import org.junit.Test;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 
-import edu.rice.historytree.aggs.*;
+import edu.rice.historytree.aggs.ConcatAgg;
+import edu.rice.historytree.aggs.SHA256AggB64;
 import edu.rice.historytree.generated.Serialization;
 import edu.rice.historytree.storage.AppendOnlyArrayStore;
 import edu.rice.historytree.storage.ArrayStore;
@@ -35,7 +36,6 @@ public class TestHistory extends TestCase {
 			"[[[[A,B],[C,D]],[[E,F],[G,H]]],[[[I,J],[K,]],]]",
 			"[[[[A,B],[C,D]],[[E,F],[G,H]]],[[[I,J],[K,L]],]]",
 	};
-
 	
 	public HistoryTree<String,String> doTestAppendOnStore(HistoryDataStoreInterface<String,String> store) {
 		String mynames[] = Arrays.copyOf(NAMES,9);
